@@ -1,8 +1,10 @@
 import os
 import numpy as np
-import cPickle as pkl
+import pickle as pkl
 from utils.serialization import backwards_compatibility_replacements
-from psbody.smpl import load_model
+from .smpl.serialization import load_model
+# from smpl_webuser.serialization import load_model
+
 from utils.geometry import get_hres
 import scipy.sparse as sp
 
@@ -33,7 +35,10 @@ class SmplPaths:
 
     def get_hres_smpl_model_data(self):
 
-        dd = pkl.load(open(self.get_smpl_file()))
+        smpl_file = open(self.get_smpl_file(), 'rb')
+        u = pkl._Unpickler(smpl_file)
+        u.encoding = 'latin1'
+        dd = u.load()
         backwards_compatibility_replacements(dd)
 
         hv, hf, mapping = get_hres(dd['v_template'], dd['f'])

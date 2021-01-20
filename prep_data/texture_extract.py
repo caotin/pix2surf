@@ -1,7 +1,7 @@
 import numpy as np
 import cv2
 import os
-import cPickle as pkl
+import pickle as pkl
 import argparse
 
 from opendr.serialization import load_mesh
@@ -19,13 +19,17 @@ def main(vt_ft_path, gar_type, mesh_location,  texture_location,
     img = cv2.imread(texture_location) / 255.
     img = cv2.resize(img, (1000,1000))
 
-    cam_data = pkl.load(open(cam_file, 'r'))
+    cam_data = pkl.load(open(cam_file, 'rb'))
     cam_y, cam_z = cam_data[gar_type]['cam_y'], cam_data[gar_type]['cam_z']
 
     camera = ProjectPoints(v=mesh.v, f=np.array([1000, 1000]), c=np.array([1000, 1000]) / 2.,
                            t=np.array([0, cam_y, cam_z]), rt=np.zeros(3), k=np.zeros(5))
 
-    data = pkl.load(open(vt_ft_path, 'r'))[gar_type]
+    gar_file = open(vt_ft_path, 'rb')
+    u = pkl._Unpickler(gar_file)
+    u.encoding = 'latin1'
+    data = u.load()[gar_type]
+    print(data)
     iso = Isomapper(data['vt'], data['ft'], 2000)
 
     tex = iso.render(img, camera, mesh.f)

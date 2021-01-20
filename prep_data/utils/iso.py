@@ -1,11 +1,11 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 import cv2
 import numpy as np
 
-from renderer import OrthoTexturedRenderer, OrthoColoredRenderer
-from camera import OrthoProjectPoints
+from .renderer import OrthoTexturedRenderer, OrthoColoredRenderer
+from .camera import OrthoProjectPoints
 
 GL_NEAREST = 0x2600
 

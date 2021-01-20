@@ -4,13 +4,13 @@
 
 import numpy as np
 import chumpy as ch
-import cPickle as pkl
+import pickle as pkl
 import scipy.sparse as sp
 from chumpy.ch import Ch
-from psbody.smpl.posemapper import posemap, Rodrigues
-from psbody.smpl.serialization import backwards_compatibility_replacements
+from .smpl.posemapper import posemap, Rodrigues
+from .smpl.serialization import backwards_compatibility_replacements
 
-from ch import sp_dot
+from .ch import sp_dot
 
 
 class Smpl(Ch):

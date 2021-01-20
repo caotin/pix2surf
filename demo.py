@@ -44,7 +44,7 @@ class Demo():
         ap.add_argument("--body_tex", type = str, default = './test_data/images/body_tex/body_tex.jpg')
 
         self.opt = ap.parse_args()
-        assert (int(self.opt.img_id) < 5 and int(self.opt.img_id) >= 0), 'Please enter an img_id between 0 and 4'
+        assert (int(self.opt.img_id) < 6 and int(self.opt.img_id) >= 0), 'Please enter an img_id between 0 and 4'
         assert (int(self.opt.pose_id) < 5 and int(self.opt.pose_id) >= 0), 'Please enter a pose_id between 0 and 4'
     def get_path(self):
         self.opt.low_mesh = './test_data/meshes/'+ self.opt.low_type + '/lower_{}.obj'.format(self.opt.pose_id)
@@ -76,10 +76,12 @@ class Demo():
         for s in list(self.opt.gpus):
             if (s.isdigit()):
                 gpus.append(int(s))
-        if gpus[0] == -1:
-            self.device = torch.device("cpu")
-        else:
-            self.device = torch.device("cuda", index=gpus[0])
+        self.device = torch.device("cpu")
+        
+        # if gpus[0] == -1:
+        #     self.device = torch.device("cpu")
+        # else:
+        #     self.device = torch.device("cuda", index=gpus[0])
 
         self.opt.gpu_ids = gpus
 
@@ -113,10 +115,10 @@ class Demo():
         dict = ['up_front', 'up_back', 'low_front', 'low_back']
         for val in dict:
             map_net_pth = getattr(self.opt, 'map_'+ val)
-            self.net_map.load_state_dict(torch.load(map_net_pth))
+            self.net_map.load_state_dict(torch.load(map_net_pth, map_location="cpu"))
 
             seg_net_pth = getattr(self.opt, 'seg_'+val)
-            self.net_seg.load_state_dict(torch.load(seg_net_pth))
+            self.net_seg.load_state_dict(torch.load(seg_net_pth, map_location="cpu"))
 
             self.net_seg.to(self.device)
             self.net_seg.eval()
@@ -170,13 +172,13 @@ class Demo():
     def run(self):
         self.forward()
         self.combine_textures()
-        os.system('blender --background --python render.py -- --body_tex {} --body_mesh {} --up_tex {} --up_mesh {} --low_mesh {} --low_tex {} --renderfolder {}'.format(
+        os.system('/Applications/Blender.app/Contents/MacOS/blender --background --python render.py -- --body_tex {} --body_mesh {} --up_tex {} --up_mesh {} --low_mesh {} --low_tex {} --renderfolder {}'.format(
             self.opt.body_tex, self.opt.body_mesh, self.opt.tex_loc_up, self.opt.up_mesh, self.opt.low_mesh, self.opt.tex_loc_low, self.opt.video
         ))
 
         self.make_video()
-        os.system('rm -r {}'.format(self.opt.output))
-        os.system('rm -r {}'.format(self.opt.video))
+        # os.system('rm -r {}'.format(self.opt.output))
+        # os.system('rm -r {}'.format(self.opt.video))
 
 
 if __name__ == '__main__':

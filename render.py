@@ -56,7 +56,10 @@ class Renderer():
         self.scene.render.resolution_percentage = 100
         self.scene.render.use_border = False
         # scene.render.alpha_mode = 'TRANSPARENT'
-        self.scene.render.alpha_mode = 'TRANSPARENT'
+        # self.scene.render.alpha_mode = 'TRANSPARENT'
+
+        # bpy.context.scene.render.image_settings.color_mode = 'RGBA'
+        self.scene.render.film_transparent = True
 
 
         bpy.ops.object.select_all(action='SELECT')
@@ -65,18 +68,40 @@ class Renderer():
 
 
     def setup_lights(self):
-        # Create new lamp datablock
-        lamp_data = bpy.data.lamps.new(name="New Lamp", type='HEMI')
-        lamp_data.energy = 1
-        # Create new object with our lamp datablock
-        lamp_object = bpy.data.objects.new(name="New Lamp", object_data=lamp_data)
-        # Link lamp object to the scene so it'll appear in this scene
-        self.scene.objects.link(lamp_object)
-        # Place lamp to a specified location
-        lamp_object.location = (15.0, 0.0, 15.0)
-        # And finally select it make active
-        lamp_object.select = True
-        self.scene.objects.active = lamp_object
+        # Create new lamp datablock blender 2.7
+        # lamp_data = bpy.data.lamps.new(name="New Lamp", type='HEMI')
+        # lamp_data.energy = 1
+        # # Create new object with our lamp datablock
+        # lamp_object = bpy.data.objects.new(name="New Lamp", object_data=lamp_data)
+        # # Link lamp object to the scene so it'll appear in this scene
+        # self.scene.objects.link(lamp_object)
+        # # Place lamp to a specified location
+        # lamp_object.location = (15.0, 0.0, 15.0)
+        # # And finally select it make active
+        # lamp_object.select = True
+        # self.scene.objects.active = lamp_object
+
+        # Create lights datablock blender 2.9
+
+        # create light datablock, set attributes
+        light_data = bpy.data.lights.new(name="light_2.80", type='SUN')
+        light_data.energy = 1
+
+        # create new object with our light datablock
+        light_object = bpy.data.objects.new(name="light_2.80", object_data=light_data)
+
+        # link light object
+        bpy.context.collection.objects.link(light_object)
+
+        # make it active 
+        bpy.context.view_layer.objects.active = light_object
+
+        #change location
+        light_object.location = (15.0, 0.0, 15.0)
+
+        # update scene, if needed
+        # dg = bpy.context.evaluated_depsgraph_get() 
+        # dg.update()
 
         # # Add Light
         # bpy.ops.object.light_add(type='POINT', radius=1.0, location=(0, -2, 0.5))
@@ -103,19 +128,42 @@ class Renderer():
 
         #Texture
         img = bpy.data.images.load(tex_loc)
-        cTex = bpy.data.textures.new('Texture', type='IMAGE')
-        cTex.image = img  # setup texture
-        mat = bpy.data.materials.new(name='object')  # setup material
+        
+        # add texture to obj blender 2.8
+        mat = bpy.data.materials.new(name="Texture")
+        mat.use_nodes = True
+        bsdf = mat.node_tree.nodes["Principled BSDF"]
+        texImage = mat.node_tree.nodes.new('ShaderNodeTexImage')
+        texImage.image = img
+        mat.node_tree.links.new(bsdf.inputs['Base Color'], texImage.outputs['Color'])
 
-        # add texture to material
-        mtex = mat.texture_slots.add()
-        mtex.texture = cTex
+        # mat.nodes.active = texImage
+        # ob = context.view_layer.objects.active
+        mat.specular_color = (1, 1, 1)
+
+        if obj_object.data.materials:
+            obj_object.data.materials[0] = mat
+        else:
+            obj_object.data.materials.append(mat)
+        # cTex = bpy.data.textures.new('Texture', type='IMAGE')
+        # cTex.image = img  # setup texture
+        # mat = bpy.data.materials.new(name='object')  # setup material
+
+        # # add texture to material
+        # mtex = mat.texture_slots.add()
+        # mtex.texture = cTex
 
         # Texture properties
         mat.specular_color = (1, 1, 1)
-        mat.use_shadeless = True
+        # mat.use_shadeless = True
         obj_object.data.materials.append(mat)
 
+        # bpy.ops.object.shade_smooth()
+
+        directory = os.path.dirname("./")
+        target_file = os.path.join(directory, 'myfile.obj')
+
+        bpy.ops.export_scene.obj(filepath=target_file)
         # if body_bool:
         #     self.obj_focus = bpy.data.objects[0]
 

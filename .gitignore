@@ -1,0 +1,10 @@
+assets
+data
+output
+pretrained
+test_data
+.vscode
+video
+*.obj
+*.zip
+*.mp4

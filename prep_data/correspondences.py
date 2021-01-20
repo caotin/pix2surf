@@ -1,7 +1,7 @@
 import numpy as np
 import argparse
 import cv2
-import cPickle as pkl
+import pickle as pkl
 import os
 
 
@@ -24,7 +24,7 @@ def main(mesh, sv_file, side, size, fmap_location, bmap_location, cam_file, gar_
     from psbody.mesh import Mesh
 
     print(fmap_location)
-    cam_data = pkl.load(open(cam_file, 'r'))
+    cam_data = pkl.load(open(cam_file, 'rb'))
     cam_z, cam_y = cam_data[gar_type]['cam_z'], cam_data[gar_type]['cam_y']
 
     mesh = Mesh(filename = mesh)

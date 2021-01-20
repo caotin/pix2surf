@@ -1,20 +1,21 @@
 import numpy as np
 
+
 def get_edges2face(faces):
     from itertools import combinations
-    from sets import Set
     from collections import OrderedDict
     # Returns a structure that contains the faces corresponding to every edge
     edges = OrderedDict()
     for iface, f in enumerate(faces):
         sorted_face_edges = tuple(combinations(sorted(f), 2))
         for sorted_face_edge in sorted_face_edges:
-            if edges.has_key(sorted_face_edge):
+            if sorted_face_edge in edges:
                 edges[sorted_face_edge].faces.add(iface)
             else:
-                edges[sorted_face_edge] = lambda:0
-                edges[sorted_face_edge].faces = Set([iface])
+                edges[sorted_face_edge] = lambda: 0
+                edges[sorted_face_edge].faces = set([iface])
     return edges
+
 
 def get_boundary_verts(verts, faces, connected_boundaries=True, connected_faces=False):
     """
@@ -30,7 +31,7 @@ def get_boundary_verts(verts, faces, connected_boundaries=True, connected_faces=
     boundary_verts = []
     boundary_edges = []
     boundary_faces = []
-    for edge, (key, val) in enumerate(edge_dict.iteritems()):
+    for edge, (key, val) in enumerate(edge_dict.items()):
         if len(val.faces) == 1:
             boundary_verts += list(key)
             boundary_edges.append(edge)
@@ -41,14 +42,15 @@ def get_boundary_verts(verts, faces, connected_boundaries=True, connected_faces=
         return boundary_verts
     n_removed_verts = 0
     if connected_boundaries:
-        edge_mat = np.array(edge_dict.keys())
+        edge_mat = np.array(list(edge_dict.keys()))
         # Edges on the boundary
         edge_mat = edge_mat[np.array(boundary_edges)]
 
         # check that every vertex is shared by only two edges
         for v in boundary_verts:
             if np.sum(edge_mat == v) != 2:
-                import ipdb; ipdb.set_trace();
+                import ipdb
+                ipdb.set_trace()
                 raise ValueError('The boundary edges are not closed loops!')
 
         cnct_bound_verts = []
@@ -78,8 +80,10 @@ def get_boundary_verts(verts, faces, connected_boundaries=True, connected_faces=
             else:
                 n_removed_verts += len(bverts)
     count = 0
-    for ring in cnct_bound_verts: count += len(ring)
-    assert(len(boundary_verts) - n_removed_verts == count), "Error computing boundary rings !!"
+    for ring in cnct_bound_verts:
+        count += len(ring)
+    assert(len(boundary_verts) - n_removed_verts ==
+           count), "Error computing boundary rings !!"
 
     if connected_faces:
         return (boundary_verts, boundary_faces, cnct_bound_verts)
